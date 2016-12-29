@@ -20,20 +20,8 @@ connection.connect(function(error){
 });
 
 // A query which returns all data for songs sung by a specific artist
-function findProduct(productName){
-    connection.query("SELECT * FROM products WHERE ?", {"product_name": productName}, function (error, results, fields) {
-        // error will be an Error if one occurred during the query 
-        if (error) console.log("Error: " + error);
-        // results will contain the results of the query 
-        // fields will contain information about the returned results fields (if any) 
-        for (var i = 0; i < results.length; i++){
-            //
-        }
-    });
-}
-
-// A query which returns all data for songs sung by a specific artist
 function printAllProducts(){
+    //print all products in the inventory 
     connection.query("SELECT * FROM products", function (error, results, fields) {
         // error will be an Error if one occurred during the query 
         if (error) console.log("Error: " + error);
@@ -43,58 +31,65 @@ function printAllProducts(){
         for (var i = 0; i < results.length; i++){
             console.log("Product #" + results[i].item_id);
             console.log("Name: " + results[i].product_name);
-            // console.log("Department: " + results[i].department_name);
+            //console.log("Department: " + results[i].department_name);
             console.log("Price: " + results[i].price);
+            console.log("Quantity: " + results[i].stock_quantity);
             console.log("-----");
         };
+        //ask for input from customer
+        inquirer.prompt([
+            {
+                type: "input",
+                name: "purchaseId",
+                message: "Which item would you like to buy (Enter the Product ID Number)? "
+            },
+            {
+                type: "input",
+                name: "purchaseAmount",
+                message: "What quantity would you like to buy? "
+            }
+        ]).then(function(input) {
+            //check to see if there is enough quantity left
+            checkInventory(input.purchaseId, input.purchaseAmount);
+        });
     });
+
 }
 
-function checkAmount(productId, purchaseAmount){
-    //check the database
-    //return true if amount is available
-    //return false if amount is not available
+function checkInventory(itemId, purchaseAmount){
+    //check the database and see how many items are left 
+    return connection.query("SELECT * FROM products WHERE ?", {"item_id": itemId}, function (error, results, fields) {
+        // error will be an Error if one occurred during the query 
+        if (error) {
+            console.log("Error: " + error);
+            return;
+        };
+        // results will contain the results of the query 
+        var quantityAvailable = results[0].stock_quantity;
+        var price = results[0].price;
+        //see if quantity is available 
+        if (quantityAvailable >= purchaseAmount) {
+            //quantity is available, so do the update.
+            updateInventory(itemId, quantityAvailable, purchaseAmount, price);
+        } else {
+            //if no quantity is available, tell the user this 
+            console.log("Insufficient quantity");
+        };
+    });
 };
 
-function updateInventory(productID, purchaseAmount){
-    //remove the content from the database
-    for (var i = 0; i < purchaseAmount; i++){
-        //remove one line from the database with this productID
-
-    }
+function updateInventory(itemId, currentAmount, purchaseAmount, price){
+    var currentInventory = currentAmount;
+    var newInventory = currentInventory - purchaseAmount;
+    //update the inventory ID
+    connection.query("UPDATE products SET ? WHERE ?", [{"stock_quantity": newInventory}, {"item_id": itemId}], function(error, response){ 
+        if (error) {
+            throw error;
+        };
+        console.log("Thank you for your purchase! We have updated our inventory");
+        var totalCost = purchaseAmount * price; 
+        console.log("Your total purchase price is $" + totalCost);
+    });
 };
 
 printAllProducts();
-
-inquirer.prompt([
-      {
-        type: "input",
-        name: "purchaseId",
-        message: "Which item would you like to buy (Enter the Product ID Number)? ",
-        validate: function(value) {
-          if (isNaN(value) === false && parseInt(value) > 0 && parseInt(value) <= 10) {
-            return true;
-          }
-          return false;
-        }
-      },
-      {
-        type: "input",
-        name: "purchaseAmount",
-        message: "What quantity would you like to buy? ",
-        validate: function(value) {
-          if (isNaN(value) === false && parseInt(value) > 0 && parseInt(value) <= 10) {
-            return true;
-          }
-          return false;
-      }
-    ]).then(function(input) {
-        //check to see if there is enough quantity left
-        if (checkAmount(input,purchaseId, input.purchaseAmount)){
-            //if there is enough quantity, update the purchaseID
-            updateInventory(input.purchaseId, input.purchaseAmount);
-        //else: tell them "insufficient quantity"
-        } else {
-            console.log("Insufficient quantity");
-        }
-    });
