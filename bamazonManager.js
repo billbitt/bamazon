@@ -51,15 +51,14 @@ function viewProducts(){
             return;
         };
         // list all items in the inventory 
-        console.log("-----Start: all products in inventory-----");
+        console.log("----- Start: all products in inventory -----");
         for (var i = 0; i < results.length; i++){
-            console.log("Product #" + results[i].item_id);
+            console.log("--- Product #" + results[i].item_id + " ---");
             console.log("Name: " + results[i].product_name);
             console.log("Price: " + results[i].price);
             console.log("Quantity: " + results[i].stock_quantity);
-            console.log("-----");
         };
-        console.log("-----End: all products in inventory-----");
+        console.log("----- End: all products in inventory -----");
         //return to manager prompt
         commandLineInterface();
     });
@@ -74,14 +73,14 @@ function viewLowInventory(){
             return;
         };
         // list all items in the inventory 
-        console.log("-----Start: all products with low inventory-----");
+        console.log("----- Start: all products with low inventory -----");
         for (var i = 0; i < results.length; i++){
             console.log("--- Product #" + results[i].item_id + " ---");
             console.log("Name: " + results[i].product_name);
             console.log("Price: " + results[i].price);
             console.log("Quantity: " + results[i].stock_quantity);
         };
-        console.log("-----End: all products with low inventory-----");
+        console.log("----- End: all products with low inventory -----");
         //return to manager prompt
         commandLineInterface();
     });
@@ -128,9 +127,46 @@ function addInventory(){
 }
 
 function addNewProduct(){
-
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "itemName",
+            message: "What is the name of the item to add?"
+        },
+        {
+            type: "input",
+            name: "itemDepartment",
+            message: "What is the department of the item to add?"
+        },
+        {
+            type: "input",
+            name: "itemQuantity",
+            message: "What is the quantity of the item to add?"
+        },
+        {
+            type: "input",
+            name: "itemPrice",
+            message: "What is the price of the item to add?"
+        }
+    ]).then(function(input) {
+        //store the user's input in variables
+        var itemName = input.itemName;
+        var itemDepartment = input.itemDepartment;
+        var itemQuantity = parseInt(input.itemQuantity);
+        var itemPrice = parseFloat(input.itemPrice);
+        //check the database for the item by Id
+        connection.query("INSERT INTO products SET ?", {"product_name": itemName, "department_name": itemDepartment, "price": itemPrice, "stock_quantity": itemQuantity}, function (error, results, fields) {
+            // error will be an Error if one occurred during the query 
+            if (error) {
+                console.log("Error: " + error);
+                return;
+            };
+            //display a note that the item has been added   
+            console.log("Your item has been added");
+            commandLineInterface();
+        });
+    });
 }
-
 
 //start app
 commandLineInterface();
