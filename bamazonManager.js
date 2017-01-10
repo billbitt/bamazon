@@ -89,7 +89,7 @@ function viewLowInventory(){
 }
 
 function addInventory(){
-
+    
 }
 
 function addNewProduct(){
