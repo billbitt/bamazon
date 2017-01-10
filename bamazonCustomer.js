@@ -29,7 +29,7 @@ function startShopping(){
         // display 'results', which will contain the results of the query 
         console.log("-----Start: all products for sale------");
         for (var i = 0; i < results.length; i++){
-            console.log(" >>> Product #" + results[i].item_id + " <<< ");
+            console.log("--- Product #" + results[i].item_id + " ---");
             console.log("Name: " + results[i].product_name);
             //console.log("Department: " + results[i].department_name);
             console.log("Price: " + results[i].price);
@@ -53,7 +53,7 @@ function startShopping(){
             checkInventory(input.purchaseId, input.purchaseAmount, function(inventoryAvailable) {
                 if (inventoryAvailable) {
                     //if inventory is available, update.
-                    updateInventory(input.purchaseId, input.purchaseAmount);
+                    updateInventory(input.purchaseId, parseInt(input.purchaseAmount));
                 } else {
                     //if no quantity is available, tell the user this 
                     console.log("Insufficient quantity");
@@ -92,7 +92,7 @@ function updateInventory(itemId, purchaseQuantity){
             return;
         };
         // get the information from the result necessary to make the update 
-        var currentInventory = results[0].stock_quantity;
+        var currentInventory = parseInt(results[0].stock_quantity);
         var newInventory = currentInventory - purchaseQuantity;
         var price = results[0].price;
         //update the inventory by Id
