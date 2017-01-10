@@ -1,7 +1,6 @@
 var mysql = require ("mysql");
 var inquirer = require ("inquirer");
 
-
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -19,23 +18,24 @@ connection.connect(function(error){
     };
 });
 
-// A query which returns all data for songs sung by a specific artist
-function printAllProducts(){
+function startShopping(){
     //print all products in the inventory 
     connection.query("SELECT * FROM products", function (error, results, fields) {
-        // error will be an Error if one occurred during the query 
-        if (error) console.log("Error: " + error);
-        // results will contain the results of the query 
-        // fields will contain information about the returned results fields (if any) 
-        console.log("-----All Products for Sale------");
+        // error will return true if one occurred during the query 
+        if (error) {
+            console.log("Error: " + error);
+            return;
+        };
+        // display 'results', which will contain the results of the query 
+        console.log("-----Start: all products for sale------");
         for (var i = 0; i < results.length; i++){
-            console.log("Product #" + results[i].item_id);
+            console.log(" >>> Product #" + results[i].item_id + " <<< ");
             console.log("Name: " + results[i].product_name);
             //console.log("Department: " + results[i].department_name);
             console.log("Price: " + results[i].price);
             console.log("Quantity: " + results[i].stock_quantity);
-            console.log("-----");
         };
+        console.log("-----End: all products for sale------");
         //ask for input from customer
         inquirer.prompt([
             {
@@ -92,4 +92,4 @@ function updateInventory(itemId, currentAmount, purchaseAmount, price){
     });
 };
 
-printAllProducts();
+startShopping();
